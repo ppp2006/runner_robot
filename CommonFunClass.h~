@@ -1,0 +1,18 @@
+#pragma once
+ #include <string> 
+    using namespace std;  
+class CCommonFunClass
+{
+public:
+	CCommonFunClass(void);
+	~CCommonFunClass(void);
+public:
+	void WriteTxt(const char* sFilePath, const char* sValue);
+	void writetoCSV(const char* sPath, const char* sValue);
+	int GetParamDir(string &_sPath);
+	void GetDirAllFile(string sPath, vector<string> &_vsFileName);
+	int GetDirAllFolder(string sPath, vector<string> &_vsFolder);
+	int GetDirAllFile(string sPath, vector<string> &_vsFolder, vector<string> vsFileName[]);
+
+};
+

@@ -1,0 +1,214 @@
+//#include "StdAfx.h"
+#include <cv.h>  
+    #include <highgui.h>  
+    #include <iostream>  
+#include <vector>  
+#include "CommonFunClass.h"
+
+
+CCommonFunClass::CCommonFunClass(void)
+{
+}
+
+
+CCommonFunClass::~CCommonFunClass(void)
+{
+}
+
+
+void CCommonFunClass::WriteTxt(const char* sFilePath, const char* sValue)
+{
+	if (strlen(sFilePath) < 1)
+	{
+		return;
+	}
+
+	FILE *pFile = NULL;
+	pFile = fopen(sFilePath, "at");//fopen(s,"a+"/*"at"*/);
+	if (NULL == pFile)
+	{
+		return;
+	}
+
+	fprintf(pFile,"%s", sValue);
+	fprintf(pFile,"\n");
+	fclose(pFile);
+}
+
+int CCommonFunClass::GetParamDir(string &_sPath)
+{
+	TCHAR _szPath[MAX_PATH+1] = {0};	
+	GetModuleFileName(NULL, _szPath, MAX_PATH);
+	(_tcsrchr(_szPath, _T('\\')))[1] = 0;
+	string sPath;
+	sPath.empty();
+	for (int n=0; _szPath[n]; n++)
+	{
+		if (_szPath[n] != _T('\\'))
+		{
+			sPath += _szPath[n]; 
+		}
+		else
+		{
+			sPath += _T("\\\\");			
+		}
+   }
+   _sPath = sPath;
+
+   return 0;
+}
+
+void CCommonFunClass::GetDirAllFile(string sPath, vector<string> &_vsFileName)
+{
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	string s = "";	
+	string sTemp = "";
+	int nLen = 0;
+
+	//s.Foramt("%s", sPath);
+	s = sPath + "\\*.*";
+	hFind = FindFirstFile(s.c_str(), &FindFileData);
+	if (hFind == INVALID_HANDLE_VALUE) 
+	{
+		return;
+	} 
+	else 
+	{
+		do
+		{
+			sTemp = FindFileData.cFileName;
+			if (FindFileData.cFileName[0] == '.')//过滤本级目录和父目录 
+			{
+				continue;	
+			}
+
+			nLen = sTemp.size();
+			if (sTemp.length()>4 )// && !Right(4).CompareNoCase(".bmp"))
+			{
+			/*	if (sTemp.at(nLen-1) == 'm')
+				{		
+					_vsFileName.push_back(sTemp);
+				}*/
+				if (sTemp.at(nLen-4) == '.')
+				{		
+					_vsFileName.push_back(sTemp);	
+				}		
+			}				
+		}
+		while (FindNextFile(hFind, &FindFileData) != 0); 
+	}	 
+	// 查找结束
+	FindClose(hFind);
+
+	return;
+}
+int CCommonFunClass::GetDirAllFolder(string sPath, vector<string> &_vsFolder)
+{
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	string s = "";
+	s = sPath + "\\*.*";
+	string sTemp = "";
+	int nLen = 0;
+
+	hFind = FindFirstFile(s.c_str(), &FindFileData);
+    if (hFind == INVALID_HANDLE_VALUE) 
+	{
+		return NULL;
+	} 
+	else 
+	{
+		do
+		{
+			sTemp = FindFileData.cFileName;
+			if (FindFileData.cFileName[0] == '.')//过滤本级目录和父目录 
+			{
+				continue;	
+			}
+			
+			nLen = sTemp.length();
+			if (nLen > 4)// && sTemp.Right(4).GetAt(0) == '.')
+			{
+				if (sTemp.at(nLen-4) == '.')
+				{		
+					continue;
+				}
+			}
+			_vsFolder.push_back(sTemp);
+		}
+		while (FindNextFile(hFind, &FindFileData) != 0); 
+	}	 
+	
+	// 查找结束
+	FindClose(hFind);
+	
+	return 0;
+}
+int CCommonFunClass::GetDirAllFile(string sPath, vector<string> &_vsFolder, vector<string> vsFileName[])
+{
+	_vsFolder.clear();
+
+	GetDirAllFolder(sPath, _vsFolder);
+	int nNum = _vsFolder.size();
+	
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind;
+	string s = "";	
+	string sTemp = "";
+	int nLen = 0;
+	
+	for (int i=0; i<nNum; i++)
+	{  
+		vsFileName[i].clear();
+		s = sPath + "\\" + _vsFolder.at(i) + "\\*.*";
+		hFind = FindFirstFile(s.c_str(), &FindFileData);
+		if (hFind == INVALID_HANDLE_VALUE) 
+		{
+			return NULL;
+		} 
+		else 
+		{
+			do
+			{
+				sTemp = FindFileData.cFileName;
+				if (FindFileData.cFileName[0] == '.')//过滤本级目录和父目录 
+				{
+					continue;	
+				}
+				
+				nLen = sTemp.length();
+				if (nLen > 4)// && !sTemp.Righ t(4).CompareNoCase(".bmp"))
+				{			
+					if (sTemp.at(nLen-4)=='.' && sTemp.at(nLen-3)== 'b' )
+					{		
+						vsFileName[i].push_back(sTemp);
+					}					
+				}				
+			}
+			while (FindNextFile(hFind, &FindFileData) != 0); 
+		}	 
+		// 查找结束
+		FindClose(hFind);
+	}
+	
+	return 0;
+}
+
+void CCommonFunClass::writetoCSV(const char* sPath, const char* sValue)
+{
+	FILE *pFileCSV = NULL;
+	pFileCSV = fopen(sPath, "at");//fopen(s,"a+"/*"at"*/);
+	if (NULL == pFileCSV)
+	{
+		return;
+	}
+
+	fprintf(pFileCSV,"%s,", sValue);
+	fprintf(pFileCSV,"\n"); 
+
+	if (pFileCSV != NULL)
+	{
+		fclose(pFileCSV);
+	}
+}
